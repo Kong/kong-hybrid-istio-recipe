@@ -1,0 +1,125 @@
+image:
+  repository: kong/kong-gateway
+  tag: 3.1.1.2
+  
+# Annotation to be added to Kong pods to work with Istio
+# podAnnotations:
+#   kuma.io/gateway: disabled
+#   traffic.sidecar.istio.io/includeInboundPorts: "*"
+
+env:
+  prefix: /kong_prefix/
+  database: "off"
+  role: data_plane
+  cluster_control_plane: kong-cp-cluster.kong.svc.cluster.local:8005
+  cluster_telemetry_endpoint: kong-cp-cluster-telemetry.kong.svc.cluster.local:8006
+  status_listen: 0.0.0.0:8100
+
+  #Logs Output level https://docs.konghq.com/gateway/latest/configure/logging/
+  log_level: warn
+  # Match the number of vCPU core for Data Planes Nodes
+  nginx_worker_processes: "4" 
+  proxy_access_log: /dev/stdout
+  admin_access_log: /dev/stdout
+  admin_gui_access_log: /dev/stdout
+  portal_api_access_log: /dev/stdout
+  proxy_error_log: /dev/stderr
+  admin_error_log: /dev/stderr
+  admin_gui_error_log: /dev/stderr
+
+  opentelemetry_trace: all
+  opentelemetry_tracing_sampling_rate: "1.0"
+
+  plugins: bundled
+
+  # Hybird Mode Communication to CP
+  # Same Key/Secret used in CP
+  cluster_cert: /etc/secrets/kong-cluster-cert/tls.crt
+  cluster_cert_key: /etc/secrets/kong-cluster-cert/tls.key
+  cluster_mtls: shared
+
+admin:
+  enabled: false 
+
+proxy:
+  enabled: true
+  type: LoadBalancer
+  annotations: 
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb" 
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false"
+  labels:
+    enable-metrics: "true"
+  http:
+    enabled: true
+    servicePort: 80
+    containerPort: 8000
+    parameters: []
+  tls:
+    enabled: true
+    servicePort: 443
+    containerPort: 8443
+    parameters:
+    - http2
+
+
+secretVolumes:
+- kong-cluster-cert
+
+# -----------------------------------------------------------------------------
+# Configure cert-manager integration
+# -----------------------------------------------------------------------------
+certificates:
+  enabled: true
+
+  # Set either `issuer` or `clusterIssuer` to the name of the desired cert manager issuer
+  # If left blank a built in self-signed issuer will be created and utilized
+  clusterIssuer: "letsencrypt-cluster-issuer"
+
+  # Set proxy.enabled to true to issue default kong-proxy certificate with cert-manager
+  proxy:
+    enabled: true
+   # Use commonName and dnsNames to set the common name and dns alt names which this
+    # certificate is valid for. Wildcard records are supported by the included self-signed issuer.
+    commonName: "proxy.aws.kongtest.net"
+    dnsNames: 
+    - "dp-proxy.aws.kongtest.net"
+
+
+  # Set admin.enabled true to issue kong admin api and manager certificate with cert-manager
+  admin:
+    enabled: false
+
+  # Set portal.enabled to true to issue a developer portal certificate with cert-manager
+  portal:
+    enabled: false
+
+  # Set cluster.enabled true to issue kong hybrid mtls certificate with cert-manager (Experimental Feature)
+  cluster:
+    enabled: false
+
+
+enterprise:
+  enabled: true
+  # CHANGEME: https://github.com/Kong/charts/blob/main/charts/kong/README.md#kong-enterprise-license
+  license_secret: kong-enterprise-license
+  vitals:
+    enabled: true
+  portal:
+    enabled: false
+  rbac:
+    enabled: false
+  smtp:
+    enabled: false
+
+manager:
+  enabled: false
+
+portal:
+  enabled: false
+
+portalapi:
+  enabled: false
+
+ingressController:
+  enabled: false
+  installCRDs: false

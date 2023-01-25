@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-cluster-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@kongtest.net
+    privateKeySecretRef:
+      name: letsencrypt-cluster-issuer-key
+    solvers:
+    - dns01:
+        route53:
+          region: ap-southeast-1
+          hostedZoneID: Z02562612WBU3REV723VU
+          role: arn:aws:iam::162225303348:role/r53-manager
+      selector:
+        dnsZones:
+          - "aws.kongtest.net"

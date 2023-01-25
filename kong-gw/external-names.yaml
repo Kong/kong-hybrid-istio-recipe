@@ -1,0 +1,28 @@
+# Internal Kubernetes FQDN for external address
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-cp-cluster
+  namespace: kong
+spec:
+  type: ExternalName
+  externalName: xxxxx-cp.elb.ap-southeast-1.amazonaws.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-cp-cluster-telemetry
+  namespace: kong
+spec:
+  type: ExternalName
+  externalName: xxxxx-telemetry.elb.ap-southeast-1.amazonaws.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-db-postgresql
+  namespace: kong
+spec:
+  type: ExternalName
+  externalName: xxxxxx.ap-southeast-1.rds.amazonaws.com

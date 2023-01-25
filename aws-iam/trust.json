@@ -1,0 +1,17 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": { 
+            "AWS": [
+              "arn:aws:iam::162225303348:role/eksctl-{prospect}-CP-nodegroup-NodeInstanceRole-XXXX",
+              "arn:aws:iam::162225303348:role/eksctl-{prospect}-DP-nodegroup-NodeInstanceRole-XXXX",
+              "arn:aws:iam::162225303348:role/eksctl-{prospect}-KIC-Istio-nodegroup-NodeInstanceRole-XXXX"
+            ]
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  }
+  

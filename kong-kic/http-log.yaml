@@ -1,0 +1,13 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: http-log
+  namespace: bookinfo
+config: 
+  http_endpoint: http://fluentbit-fluent-bit.fluent.svc.cluster.local:8888/kong.log
+  method: POST
+  timeout: 1000
+  keepalive: 1000
+  flush_timeout: 2
+  retry_count: 15
+plugin: http-log

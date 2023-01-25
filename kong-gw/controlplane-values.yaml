@@ -1,0 +1,250 @@
+image:
+  repository: kong/kong-gateway
+  tag: 3.1.1.2
+
+env:
+  # Env variables to overwrite, read more here https://github.com/Kong/kong/blob/master/kong.conf.default
+  prefix: /kong_prefix/
+  role: control_plane
+
+  #Logs Output level https://docs.konghq.com/gateway/latest/configure/logging/
+  log_level: warn 
+  nginx_worker_processes: "2"
+  proxy_access_log: /dev/stdout
+  admin_access_log: /dev/stdout
+  admin_gui_access_log: /dev/stdout
+  proxy_error_log: /dev/stderr
+  admin_error_log: /dev/stderr
+  admin_gui_error_log: /dev/stderr
+  portal_api_access_log: /dev/stdout
+  portal_api_error_log: /dev/stderr
+  
+  database: postgres
+  # Variables to set if you are using external Postgres Database
+  pg_host: kong-db-postgresql.kong.svc.cluster.local
+  pg_port: 5432
+  pg_user: konger
+  pg_database: kong # Pre-create in RDS First
+  pg_password: 
+    valueFrom:
+      secretKeyRef:
+        name: kong-db-password #CHANGEME
+        key: postgresql-password #CHANGEME
+  # pg_ssl: "off"
+  # pg_ssl_verify: "off"
+  
+  opentelemetry_trace: all
+  opentelemetry_tracing_sampling_rate: "1.0"
+
+  # Any Custom Plugins you built
+  plugins: bundled
+
+  ## Admin Configuration ##
+  #FQDN for your admin API route, you can indicate this if you already created an entry in Route 53 (Recommended Approach). Something like admin.kong.dev.customer.com
+  admin_api_uri:  https://admin.aws.kongtest.net:8444
+
+  #FQDN for your admin gui (Kong Manager) route, you can indicate this if you already created an entry in Route 53 (Recommended Approach) manager.kong.dev.customer.com
+  admin_gui_url:  https://manager.aws.kongtest.net:8445
+  
+  ### TLS Settings ###
+
+  # Hybird Mode Communication requirement
+  cluster_cert: /etc/secrets/kong-cluster-cert/tls.crt
+  cluster_cert_key: /etc/secrets/kong-cluster-cert/tls.key
+  cluster_mtls: shared
+
+
+  # Portal configuration if required
+  portal_gui_protocol: https
+  portal_api_url: https://portalapi.aws.kongtest.net:8447
+  portal_gui_host: portal.aws.kongtest.net:8446
+  portal: on
+
+  password: # Set default Super Admin Password
+    valueFrom:
+      secretKeyRef:
+        name: kong-enterprise-superuser-password 
+        key: password 
+
+cluster: 
+  enabled: true   
+  type: LoadBalancer # set to cluster ip if both CP and DP sits together
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb" 
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false" # Can be set to true for internal lb so that you won't exposed it to the public
+  tls:
+    enabled: true 
+    servicePort: 8005
+    containerPort: 8005
+
+clustertelemetry:
+  enabled: true
+  type: LoadBalancer # set to cluster ip if both CP and DP sits together
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb" 
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false" # Can be set to true for internal lb so that you won't exposed it to the public
+  tls:
+    enabled: true 
+    servicePort: 8006
+    containerPort: 8006
+
+admin:
+  enabled: true
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb" 
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false" # Can be set to true for internal lb so that you won't exposed it to the public
+  
+  http:
+    # Enable plaintext HTTP listen for the admin API
+    # Disabling this and using a TLS listen only is recommended for most configuration
+    enabled: false
+
+  tls:
+    # Enable HTTPS listen for the admin API
+    enabled: true
+    servicePort: 8444
+    containerPort: 8444
+    parameters:
+    - http2
+
+proxy:
+  # Enable creating a Kubernetes service for the proxy
+  enabled: false
+
+secretVolumes:
+- kong-cluster-cert
+
+enterprise:
+  enabled: true
+  # CHANGEME: https://github.com/Kong/charts/blob/main/charts/kong/README.md#kong-enterprise-license
+  license_secret: kong-enterprise-license
+  vitals:
+    enabled: true
+  portal:
+    enabled: true
+  rbac:
+    enabled: true
+    admin_gui_auth: basic-auth
+    session_conf_secret: kong-session-config
+    admin_gui_auth_conf_secret: kong-session-config
+  smtp:
+    enabled: false
+    # portal_emails_from: none@example.com
+    # portal_emails_reply_to: none@example.com
+    # admin_emails_from: none@example.com
+    # admin_emails_reply_to: none@example.com
+    # smtp_admin_emails: none@example.com
+    # smtp_host: smtp.example.com
+    # smtp_port: 587
+    # smtp_auth_type: ''
+    # smtp_ssl: nil
+    # smtp_starttls: true
+    # auth:
+    #   # If your SMTP server does not require authentication, this section can
+    #   # be left as-is. If smtp_username is set to anything other than an empty
+    #   # string, you must create a Secret with an smtp_password key containing
+    #   # your SMTP password and specify its name here.
+    #   smtp_username: ''  # e.g. postmaster@example.com
+    #   smtp_password_secret: CHANGEME-smtp-password
+
+manager:
+  enabled: true
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb" 
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false" # Can be set to true for internal lb so that you won't exposed it to the public
+  
+  http:
+    enabled: false
+
+
+portal:
+  enabled: true # Enable True if required
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb" 
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false"
+
+portalapi:
+  enabled: true # Enable True if required
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb" 
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false"
+
+postgresql:
+  enabled: false  #set to fasle if using Remote RDS
+  # auth:
+  #   username: kong
+  #   database: kong
+
+
+# -----------------------------------------------------------------------------
+# Configure cert-manager integration
+# -----------------------------------------------------------------------------
+certificates:
+  enabled: true
+
+  # Set either `issuer` or `clusterIssuer` to the name of the desired cert manager issuer
+  # If left blank a built in self-signed issuer will be created and utilized
+  issuer: ""
+  clusterIssuer: "letsencrypt-cluster-issuer"
+
+  # Set proxy.enabled to true to issue default kong-proxy certificate with cert-manager
+  proxy:
+    enabled: false
+
+  # Set admin.enabled true to issue kong admin api and manager certificate with cert-manager
+  admin:
+    enabled: true
+    # Set `issuer` or `clusterIssuer` to name of alternate cert-manager clusterIssuer to override default
+    # self-signed issuer.
+    issuer: ""
+    clusterIssuer: "letsencrypt-cluster-issuer"
+    # Use commonName and dnsNames to set the common name and dns alt names which this
+    # certificate is valid for. Wildcard records are supported by the included self-signed issuer.
+    commonName: "manager.aws.kongtest.net"
+    # Remove the "[]" and uncomment/change the examples to add SANs
+    dnsNames: 
+    - "admin.aws.kongtest.net"
+
+  # Set portal.enabled to true to issue a developer portal certificate with cert-manager
+  portal:
+    enabled: true
+    # Set `issuer` or `clusterIssuer` to name of alternate cert-manager clusterIssuer to override default
+    # self-signed issuer.
+    issuer: ""
+    clusterIssuer: "letsencrypt-cluster-issuer"
+    # Use commonName and dnsNames to set the common name and dns alt names which this
+    # certificate is valid for. Wildcard records are supported by the included self-signed issuer.
+    commonName: "portal.aws.kongtest.net"
+    # Remove the "{}" and uncomment/change the examples to add SANs
+    # dnsNames: 
+    # - "portal.aws.kongtest.net"
+
+  # Set cluster.enabled true to issue kong hybrid mtls certificate with cert-manager (Experimental Feature)
+  cluster:
+    enabled: false
+    # # Issuers used by the control and data plane releases must match for this certificate.
+    # issuer: ""
+    # clusterIssuer: "letsencrypt-cluster-issuer"
+    # # commonName: "kong_cluster"
+    # # dnsNames: []
+
+# Enable/disable migration jobs, and set annotations for them
+migrations:
+  # Enable pre-upgrade migrations (run "kong migrations up")
+  preUpgrade: true
+  # Enable post-upgrade migrations (run "kong migrations finish")
+  postUpgrade: true
+
+ingressController:
+  enabled: false
+  installCRDs: false
+  env:
+    kong_admin_token:
+      valueFrom:
+        secretKeyRef:
+          name: kong-enterprise-superuser-password #CHANGEME
+          key: password #CHANGEME

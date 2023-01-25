@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+# Set a KIC Only-Mode
+# -----------------------------------------------------------------------------
+deployment:
+  kong:
+    enabled: false
+# -----------------------------------------------------------------------------
+# Ingress Controller parameters
+# -----------------------------------------------------------------------------
+
+# Kong Ingress Controller's primary purpose is to satisfy Ingress resources
+# created in k8s.  It uses CRDs for more fine grained control over routing and
+# for Kong specific configuration.
+ingressController:
+  enabled: true
+  installCRDs: false
+  ingressClass: kong
+  env:
+    kong_admin_token:
+      valueFrom:
+        secretKeyRef:
+          name: kong-enterprise-superuser-password 
+          key: password 
+    kong_workspace: kong-kic # New Workspace that will be created at the CP
+    kong_admin_url: https://admin.aws.kongtest.net:8444
+    publish_service: kong/kong-kong-proxy  # Current Dataplane Proxy Service - {{namespace/service-name}}
+    kong_admin_filter_tag: kong-kic
