@@ -56,7 +56,7 @@ Switch to the Control Plane Kubernetes context , and create a secret based on th
 
 ```
 kubectl create ns kong
-kubectl create secret tls kong-cluster-cert --cert=./cluster.crt --key=./cluster.key -n kong-control-plane
+kubectl create secret tls kong-cluster-cert --cert=./cluster.crt --key=./cluster.key -n kong
 ```
 
 Next, we need to create the license secret and default passwords
