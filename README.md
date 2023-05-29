@@ -71,7 +71,7 @@ kubectl create secret generic kong-enterprise-superuser-password \
 --from-literal=password=xxxx # CHANGEME
 
 #Creating session conf for Kong Manager and Kong DevPortal
-kubectl create secret generic kong-session-config -n kong --from-file=admin_gui_session_conf --from-file=portal_session_con
+kubectl create secret generic kong-session-config -n kong --from-file=admin_gui_session_conf --from-file=portal_session_conf
 ```
 
 
