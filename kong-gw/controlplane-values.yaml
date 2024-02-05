@@ -1,6 +1,6 @@
 image:
   repository: kong/kong-gateway
-  tag: 3.2.1.0
+  tag: 3.4.3.3
 
 env:
   # Env variables to overwrite, read more here https://github.com/Kong/kong/blob/master/kong.conf.default
