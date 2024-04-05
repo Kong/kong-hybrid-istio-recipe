@@ -1,6 +1,6 @@
 image:
   repository: kong/kong-gateway
-  tag: 3.4.3.3
+  tag: 3.4.3.5
   
 # Annotation to be added to Kong pods to work with Istio
 # podAnnotations:
@@ -27,8 +27,8 @@ env:
   admin_error_log: /dev/stderr
   admin_gui_error_log: /dev/stderr
 
-  opentelemetry_trace: all
-  opentelemetry_tracing_sampling_rate: "1.0"
+  tracing_instrumentations: true
+  tracing_sampling_rate: 0.2
 
   plugins: bundled
 

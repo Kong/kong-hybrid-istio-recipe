@@ -1,6 +1,6 @@
 image:
   repository: kong/kong-gateway
-  tag: 3.4.3.3
+  tag: 3.4.3.5
 
 env:
   # Env variables to overwrite, read more here https://github.com/Kong/kong/blob/master/kong.conf.default
@@ -9,7 +9,7 @@ env:
 
   #Logs Output level https://docs.konghq.com/gateway/latest/configure/logging/
   log_level: warn 
-  nginx_worker_processes: "2"
+  nginx_worker_processes: "1"   #On Kubernetes, set nginx_worker_processes to one or two less than the worker node CPUs.
   proxy_access_log: /dev/stdout
   admin_access_log: /dev/stdout
   admin_gui_access_log: /dev/stdout
@@ -33,8 +33,8 @@ env:
   # pg_ssl: "off"
   # pg_ssl_verify: "off"
   
-  opentelemetry_trace: all
-  opentelemetry_tracing_sampling_rate: "1.0"
+  tracing_instrumentations: true
+  tracing_sampling_rate: 0.2
 
   # Any Custom Plugins you built
   plugins: bundled
