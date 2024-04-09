@@ -33,7 +33,7 @@ env:
   # pg_ssl: "off"
   # pg_ssl_verify: "off"
   
-  tracing_instrumentations: true
+  tracing_instrumentations: all
   tracing_sampling_rate: 0.2
 
   # Any Custom Plugins you built

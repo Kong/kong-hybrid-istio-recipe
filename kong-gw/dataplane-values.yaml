@@ -27,7 +27,7 @@ env:
   admin_error_log: /dev/stderr
   admin_gui_error_log: /dev/stderr
 
-  tracing_instrumentations: true
+  tracing_instrumentations: all
   tracing_sampling_rate: 0.2
 
   plugins: bundled
