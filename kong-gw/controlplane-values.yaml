@@ -41,7 +41,7 @@ env:
 
   ## Admin Configuration ##
   #FQDN for your admin API route, you can indicate this if you already created an entry in Route 53 (Recommended Approach). Something like admin.kong.dev.customer.com
-  admin_api_uri:  https://admin.aws.kongtest.net:8444
+  admin_gui_api_url:  https://admin.aws.kongtest.net:8444
 
   #FQDN for your admin gui (Kong Manager) route, you can indicate this if you already created an entry in Route 53 (Recommended Approach) manager.kong.dev.customer.com
   admin_gui_url:  https://manager.aws.kongtest.net:8445
